@@ -1,0 +1,132 @@
+---
+# tasks file for nexus
+
+- name: Downloading the nexus zip file
+  get_url:
+    url: "{{ nexus_url_zip }}"
+    dest: "{{ dest_to_download_nexus_zip }}"
+
+- name: Unarchive zip file in the same path
+  unarchive:
+    src: "{{ nexus_unarchive_src }}"
+    dest: "{{ nexus_unarchive_dest }}"
+    remote_src: yes
+
+- name: remove the zip file from the folder
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ nexus_unarchive_src }}"
+
+- name: linking the directory with nexus directory
+  shell: ln -sf nexus-2.14.2-01/ nexus
+
+- name: setting the nexus home
+  shell: "echo $NEXUS_HOME"
+  environment:
+    NEXUS_HOME: "{{ nexus_home }}"
+
+- name: adding the nexus user
+  command: sudo useradd -m nexus
+  ignore_errors: yes
+
+
+- name: changing ownership of the nexus folder
+  command: sudo chown -R nexus:nexus "{{ nexus_fold }}"
+
+- name: changing ownership of the sonatype work folder
+  command: sudo chown -R nexus:nexus "{{ nexus_sonatype_fold }}"
+
+- name: replacing the content present in the file
+  command: sed -i '14d' "{{ nexus_folder }}"
+
+- name: replacing the content present in the file
+  command: sed -i '23d' "{{ nexus_folder }}"
+
+- name: replacing the content present in the file
+  command: sed -i '34d' "{{ nexus_folder }}"
+
+- name: setting the nexus home
+  command: sed -i '14i NEXUS_HOME="{{ nexus_fold }}"' "{{ nexus_folder }}"
+
+- name: changing the run as user to nexus
+  command: sed -i '23i RUN_AS_USER="nexus"' "{{ nexus_folder }}"
+
+- name: replacing the content present in the file
+  command: sed -i '34i PIDDIR="/home/nexus"' "{{ nexus_folder }}"
+
+- name: copying the nexus folder in the local directory to nexus folder in etc directory
+  command: sudo cp "{{ nexus_folder }}" "{{ etc_dir }}"
+
+- name: changing mode of the etc init.d directory
+  command: sudo chmod 755 "{{ etc_dir }}"
+
+- name: check config
+  shell: chkconfig --add nexus
+  args:
+    chdir: /etc/init.d
+
+- name: checking if config is on
+  command: sudo chkconfig --level 345 nexus on
+
+- name: remove the conf folder from the nexus directory
+  shell: rm -rf "{{ remove_conf }}"
+
+- name: Downloading the conf zip file from the s3 bucket
+  get_url:
+    url: "{{ nexus_s3_zip_file_url }}"
+    dest: "{{ dest_to_download_zip }}"
+
+- name: Unarchive zip file in the same path
+  unarchive:
+    src: "{{ unarchive_zip_src_path }}"
+    dest: "{{ unarchive_zip_dest_path }}"
+    remote_src: yes
+
+- name: starting nexus
+  command: sudo service nexus start
+
+- name: wait for nexus to start
+  wait_for: port="{{ nexus_port }}" delay=3 timeout=150
+
+- name: remove the nexus xml folder from the conf file in order to change the deployment policy
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ nexus_xml }}"
+
+- name: create a repository using nexus cli after starting nexus
+  command: nexus-cli create_repository "PETCLINIC"
+
+- name: remove the nexus xml folder from the conf file in order to change the deployment policy
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ nexus_xml }}"
+
+- name: Download zip file from s3 bucket
+  get_url:
+    url: "{{ nexus_xml_zip_from_s3_url }}"
+    dest: "{{ nexus_xml_dest_to_download_zip_file }}"
+
+- name: Unarchive zip file in the same path
+  unarchive:
+    src: "{{ unarchive_the_zip_src_path }}"
+    dest: "{{ unarchive_the_zip_dest_path }}"
+    remote_src: yes
+
+- name: starting nexus
+  command: sudo service nexus restart
+
+- name: wait for nexus to start
+  wait_for: port="{{ nexus_port }}" delay=3 timeout=100
+
+- debug:
+    msg:
+    - Nexus is successfully installed
+    - Nexus is up and running
+
+

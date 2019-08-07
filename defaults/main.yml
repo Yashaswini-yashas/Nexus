@@ -1,0 +1,23 @@
+---
+# defaults file for nexus
+
+nexus_url_zip: https://s3-us-west-2.amazonaws.com/cicdpoc/nexus-latest-bundle.tar.gz
+dest_to_download_nexus_zip: /usr/local
+nexus_unarchive_src: /usr/local/nexus-latest-bundle.tar.gz
+nexus_unarchive_dest: /usr/local
+nexus_home: /usr/local/nexus
+nexus_fold: /usr/local/nexus-2.14.2-01/
+nexus_sonatype_fold: /usr/local/sonatype-work
+nexus_folder: /usr/local/nexus-2.14.2-01/bin/nexus
+etc_dir: /etc/init.d/nexus
+remove_conf: /usr/local/nexus-2.14.2-01/bin/jsw/conf
+nexus_s3_zip_file_url: https://yasansible.s3-us-west-2.amazonaws.com/nexusconfig.zip
+dest_to_download_zip: /usr/local/nexus-2.14.2-01/bin/jsw
+unarchive_zip_src_path: /usr/local/nexus-2.14.2-01/bin/jsw/nexusconfig.zip
+unarchive_zip_dest_path: /usr/local/nexus-2.14.2-01/bin/jsw
+nexus_port: 8081
+nexus_xml: /usr/local/sonatype-work/nexus/conf/nexus.xml
+nexus_xml_zip_from_s3_url: https://yasansible.s3-us-west-2.amazonaws.com/nexusxml1.zip
+nexus_xml_dest_to_download_zip_file: /usr/local/sonatype-work/nexus/conf
+unarchive_the_zip_src_path: /usr/local/sonatype-work/nexus/conf/nexusxml1.zip
+unarchive_the_zip_dest_path: /usr/local/sonatype-work/nexus/conf
